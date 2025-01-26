@@ -1,16 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useAuth } from "react-oidc-context";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LogIn, LogOut, Loader2 } from "lucide-react";
+import { LogIn, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export function AuthComponent() {
-  const auth = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -55,7 +53,6 @@ export function AuthComponent() {
 
       // ログイン成功後、dashboardページへリダイレクト
       router.push("/dashboard");
-      // auth.signinRedirect();
     } catch (error) {
       setLoginError(
         error instanceof Error ? error.message : "ログインに失敗しました"
