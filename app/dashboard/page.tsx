@@ -4,6 +4,15 @@ import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import Header from "@/components/Header";
 
+// トークンのデコード関数
+function parseJwt(token: string) {
+  try {
+    return JSON.parse(atob(token.split(".")[1]));
+  } catch (e) {
+    return null;
+  }
+}
+
 export default function DashboardPage() {
   const [data, setData] = useState<any>(null);
   const [error, setError] = useState<string>("");
@@ -17,6 +26,14 @@ export default function DashboardPage() {
 
         if (!idToken) {
           throw new Error("認証情報が見つかりません");
+        }
+
+        // トークンの簡易チェック
+        const decodedToken = parseJwt(idToken);
+        if (decodedToken && decodedToken.exp * 1000 < Date.now()) {
+          throw new Error(
+            "セッションの有効期限が切れました。再度ログインしてください。"
+          );
         }
 
         const response = await fetch(
