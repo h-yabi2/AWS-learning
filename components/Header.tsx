@@ -5,6 +5,8 @@ export default function Header() {
     // Cookieを削除
     document.cookie =
       "appSession=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+    document.cookie =
+      "idToken=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
 
     // 強制的にページをリロード（キャッシュをクリアするため）
     window.location.href = "/";

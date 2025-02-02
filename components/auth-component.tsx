@@ -65,14 +65,21 @@ export function AuthComponent() {
 
   return (
     <Card className="p-6">
-      <form onSubmit={handleLogin} className="space-y-4">
+      <form
+        onSubmit={handleLogin}
+        className="space-y-4"
+        method="post"
+        autoComplete="on"
+      >
         <div className="space-y-2">
           <Label htmlFor="email">メールアドレス</Label>
           <Input
             id="email"
+            name="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
             required
           />
         </div>
@@ -80,9 +87,11 @@ export function AuthComponent() {
           <Label htmlFor="password">パスワード</Label>
           <Input
             id="password"
+            name="password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            autoComplete="current-password"
             required
           />
         </div>
