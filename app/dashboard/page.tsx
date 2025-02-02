@@ -14,18 +14,25 @@ function parseJwt(token: string) {
   }
 }
 
+interface UserInfo {
+  email: string;
+  sub: string;
+  email_verified: boolean;
+}
+
 export default function DashboardPage() {
   const router = useRouter();
   const [data, setData] = useState<any>(null);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const deleteCookie = (name: string) => {
-      document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT`;
-    };
+  const deleteCookie = (name: string) => {
+    document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT`;
+  };
 
-    const fetchProtectedData = async () => {
+  useEffect(() => {
+    const fetchData = async () => {
       try {
         const idToken = document.cookie
           .split("; ")
@@ -48,6 +55,13 @@ export default function DashboardPage() {
           );
         }
 
+        setUserInfo({
+          email: decodedToken.email,
+          sub: decodedToken.sub,
+          email_verified: decodedToken.email_verified,
+        });
+
+        // 既存のAPI呼び出し
         const response = await fetch(
           process.env.NEXT_PUBLIC_API_URL as string,
           {
@@ -58,7 +72,7 @@ export default function DashboardPage() {
         );
 
         if (!response.ok) {
-          throw new Error("APIの呼び出しに失敗しました");
+          throw new Error(`APIエラー: ${response.status}`);
         }
 
         const responseData = await response.json();
@@ -74,8 +88,8 @@ export default function DashboardPage() {
       }
     };
 
-    fetchProtectedData();
-  }, []);
+    fetchData();
+  }, [router]);
 
   if (loading) {
     return <div>読み込み中...</div>;
@@ -90,7 +104,35 @@ export default function DashboardPage() {
       <Header />
       <div className="container mx-auto p-6">
         <h1 className="text-2xl font-bold mb-6">ダッシュボード</h1>
+
+        {/* ユーザー情報カード */}
+        <Card className="p-6 mb-6">
+          <h2 className="text-xl font-semibold mb-4">ユーザー情報</h2>
+          <div className="space-y-2">
+            <>
+              <span className="font-medium">メールアドレス: </span>
+              <span>{userInfo?.email}</span>
+            </>
+            <div>
+              <span className="font-medium">ユーザーID: </span>
+              <span>{userInfo?.sub}</span>
+            </div>
+            <div>
+              <span className="font-medium">メール認証状況: </span>
+              <span
+                className={
+                  userInfo?.email_verified ? "text-green-600" : "text-red-600"
+                }
+              >
+                {userInfo?.email_verified ? "認証済み" : "未認証"}
+              </span>
+            </div>
+          </div>
+        </Card>
+
+        {/* API Gateway レスポンス */}
         <Card className="p-6">
+          <h2 className="text-xl font-semibold mb-4">API レスポンス</h2>
           <pre className="bg-gray-100 p-4 rounded">
             {JSON.stringify(data, null, 2)}
           </pre>
