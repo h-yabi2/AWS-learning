@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, UserPlus } from "lucide-react";
+import { Loader2, UserPlus, Mail } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export function SignUpComponent() {
@@ -70,8 +70,45 @@ export function SignUpComponent() {
     }
   };
 
+  // Googleサインイン処理
+  const handleGoogleSignIn = () => {
+    const cognitoDomain = process.env.NEXT_PUBLIC_COGNITO_DOMAIN;
+    const clientId = process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID;
+    const redirectUri = process.env.NEXT_PUBLIC_REDIRECT_URI;
+
+    const googleSignInUrl =
+      `https://${cognitoDomain}/oauth2/authorize?` +
+      `response_type=code&` +
+      `client_id=${clientId}&` +
+      `redirect_uri=${redirectUri}&` +
+      `identity_provider=Google&` +
+      `scope=openid+email+profile`;
+
+    window.location.href = googleSignInUrl;
+  };
+
   return (
     <Card className="p-6">
+      {/* Googleサインアップボタン */}
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full mb-4"
+        onClick={handleGoogleSignIn}
+      >
+        <Mail className="mr-2 h-4 w-4" />
+        Googleアカウントで続ける
+      </Button>
+
+      <div className="relative mb-4">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-gray-300" />
+        </div>
+        <div className="relative flex justify-center text-sm">
+          <span className="px-2 bg-white text-gray-500">または</span>
+        </div>
+      </div>
+
       <form
         onSubmit={handleSignUp}
         className="space-y-4"
