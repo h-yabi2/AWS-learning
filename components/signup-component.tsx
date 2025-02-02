@@ -5,21 +5,28 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LogIn, Loader2 } from "lucide-react";
+import { Loader2, UserPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 
-export function AuthComponent() {
+export function SignUpComponent() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [loginError, setLoginError] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isSigningUp, setIsSigningUp] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoggingIn(true);
-    setLoginError("");
+    setIsSigningUp(true);
+    setError("");
+
+    // パスワード確認
+    if (password !== confirmPassword) {
+      setError("パスワードが一致しません");
+      setIsSigningUp(false);
+      return;
+    }
 
     try {
       const response = await fetch(
@@ -28,46 +35,45 @@ export function AuthComponent() {
           method: "POST",
           headers: {
             "Content-Type": "application/x-amz-json-1.1",
-            "X-Amz-Target": "AWSCognitoIdentityProviderService.InitiateAuth",
+            "X-Amz-Target": "AWSCognitoIdentityProviderService.SignUp",
           },
           body: JSON.stringify({
-            AuthFlow: "USER_PASSWORD_AUTH",
             ClientId: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID,
-            AuthParameters: {
-              USERNAME: email,
-              PASSWORD: password,
-            },
+            Username: email,
+            Password: password,
+            UserAttributes: [
+              {
+                Name: "email",
+                Value: email,
+              },
+            ],
           }),
         }
       );
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "ログインに失敗しました");
+        throw new Error(error.message || "アカウント作成に失敗しました");
       }
 
       const data = await response.json();
-      console.log(data);
+      console.log("SignUp successful:", data);
 
-      // トークンをCookieに保存
-      document.cookie = `appSession=${data.AuthenticationResult.AccessToken}; path=/;`;
-      document.cookie = `idToken=${data.AuthenticationResult.IdToken}; path=/;`;
-
-      // ログイン成功後、dashboardページへリダイレクト
-      router.push("/dashboard");
+      // 確認コード入力ページへリダイレクト
+      router.push(`/confirm?email=${encodeURIComponent(email)}`);
     } catch (error) {
-      setLoginError(
-        error instanceof Error ? error.message : "ログインに失敗しました"
+      setError(
+        error instanceof Error ? error.message : "アカウント作成に失敗しました"
       );
     } finally {
-      setIsLoggingIn(false);
+      setIsSigningUp(false);
     }
   };
 
   return (
     <Card className="p-6">
       <form
-        onSubmit={handleLogin}
+        onSubmit={handleSignUp}
         className="space-y-4"
         method="post"
         autoComplete="on"
@@ -92,34 +98,38 @@ export function AuthComponent() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            autoComplete="current-password"
+            autoComplete="new-password"
             required
           />
         </div>
-        {loginError && (
-          <div className="text-red-500 text-sm text-center">{loginError}</div>
+        <div className="space-y-2">
+          <Label htmlFor="confirm-password">パスワード（確認）</Label>
+          <Input
+            id="confirm-password"
+            name="confirm-password"
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            autoComplete="new-password"
+            required
+          />
+        </div>
+        {error && (
+          <div className="text-red-500 text-sm text-center">{error}</div>
         )}
-        <Button type="submit" className="w-full" disabled={isLoggingIn}>
-          {isLoggingIn ? (
+        <Button type="submit" className="w-full" disabled={isSigningUp}>
+          {isSigningUp ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ログイン中...
+              アカウント作成中...
             </>
           ) : (
             <>
-              <LogIn className="mr-2 h-4 w-4" />
-              サインイン
+              <UserPlus className="mr-2 h-4 w-4" />
+              アカウント作成
             </>
           )}
         </Button>
-        <div className="text-center mt-4">
-          <Link
-            href="/signup"
-            className="text-sm text-blue-600 hover:underline"
-          >
-            アカウントをお持ちでない方はこちら
-          </Link>
-        </div>
       </form>
     </Card>
   );
