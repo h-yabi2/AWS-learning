@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import Header from "@/components/Header";
 
@@ -14,6 +15,7 @@ function parseJwt(token: string) {
 }
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [data, setData] = useState<any>(null);
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(true);
@@ -21,16 +23,24 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchProtectedData = async () => {
       try {
-        const idToken = localStorage.getItem("idToken");
-        console.log(idToken);
+        const idToken = document.cookie
+          .split("; ")
+          .find((row) => row.startsWith("idToken="))
+          ?.split("=")[1];
 
         if (!idToken) {
           throw new Error("認証情報が見つかりません");
         }
 
-        // トークンの簡易チェック
+        // トークン有効期限の簡易チェック
         const decodedToken = parseJwt(idToken);
         if (decodedToken && decodedToken.exp * 1000 < Date.now()) {
+          // cookie 削除
+          document.cookie = [
+            "appSession=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT",
+            "idToken=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT",
+          ].join(";");
+
           throw new Error(
             "セッションの有効期限が切れました。再度ログインしてください。"
           );
@@ -53,6 +63,12 @@ export default function DashboardPage() {
         setData(responseData);
       } catch (err) {
         setError(err instanceof Error ? err.message : "エラーが発生しました");
+        // ログアウト処理
+        document.cookie = [
+          "appSession=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT",
+          "idToken=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT",
+        ].join(";");
+        router.push("/");
       } finally {
         setLoading(false);
       }

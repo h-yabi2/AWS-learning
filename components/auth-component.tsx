@@ -48,11 +48,9 @@ export function AuthComponent() {
       const data = await response.json();
       console.log(data);
 
-      // トークンをCookieに保存（例：アクセストークン）
+      // トークンをCookieに保存
       document.cookie = `appSession=${data.AuthenticationResult.AccessToken}; path=/;`;
-
-      // idToken をローカルストレージに保存
-      localStorage.setItem("idToken", data.AuthenticationResult.IdToken);
+      document.cookie = `idToken=${data.AuthenticationResult.IdToken}; path=/;`;
 
       // ログイン成功後、dashboardページへリダイレクト
       router.push("/dashboard");
