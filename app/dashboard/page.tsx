@@ -21,6 +21,10 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const deleteCookie = (name: string) => {
+      document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT`;
+    };
+
     const fetchProtectedData = async () => {
       try {
         const idToken = document.cookie
@@ -36,10 +40,8 @@ export default function DashboardPage() {
         const decodedToken = parseJwt(idToken);
         if (decodedToken && decodedToken.exp * 1000 < Date.now()) {
           // cookie 削除
-          document.cookie = [
-            "appSession=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT",
-            "idToken=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT",
-          ].join(";");
+          deleteCookie("appSession");
+          deleteCookie("idToken");
 
           throw new Error(
             "セッションの有効期限が切れました。再度ログインしてください。"
@@ -64,10 +66,8 @@ export default function DashboardPage() {
       } catch (err) {
         setError(err instanceof Error ? err.message : "エラーが発生しました");
         // ログアウト処理
-        document.cookie = [
-          "appSession=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT",
-          "idToken=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT",
-        ].join(";");
+        deleteCookie("appSession");
+        deleteCookie("idToken");
         router.push("/");
       } finally {
         setLoading(false);
