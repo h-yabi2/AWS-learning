@@ -43,25 +43,15 @@ export default function DashboardPage() {
           throw new Error("認証情報が見つかりません");
         }
 
-        // トークン有効期限の簡易チェック
+        // トークンのデコードと userInfo の設定
         const decodedToken = parseJwt(idToken);
-        if (decodedToken && decodedToken.exp * 1000 < Date.now()) {
-          // cookie 削除
-          deleteCookie("appSession");
-          deleteCookie("idToken");
-
-          throw new Error(
-            "セッションの有効期限が切れました。再度ログインしてください。"
-          );
-        }
-
         setUserInfo({
           email: decodedToken.email,
           sub: decodedToken.sub,
           email_verified: decodedToken.email_verified,
         });
 
-        // 既存のAPI呼び出し
+        // API呼び出し
         const response = await fetch(
           process.env.NEXT_PUBLIC_API_URL as string,
           {
@@ -79,7 +69,6 @@ export default function DashboardPage() {
         setData(responseData);
       } catch (err) {
         setError(err instanceof Error ? err.message : "エラーが発生しました");
-        // ログアウト処理
         deleteCookie("appSession");
         deleteCookie("idToken");
         router.push("/");
