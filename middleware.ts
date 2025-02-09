@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
   // アクセストークンの存在確認
-  const token = request.cookies.get("appSession")?.value;
+  const token = request.cookies.get("accessToken")?.value;
   const isAuthPage = request.nextUrl.pathname === "/";
 
   // デバッグ用のログ出力（必要に応じて削除可能）

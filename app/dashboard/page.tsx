@@ -69,7 +69,7 @@ export default function DashboardPage() {
         setData(responseData);
       } catch (err) {
         setError(err instanceof Error ? err.message : "エラーが発生しました");
-        deleteCookie("appSession");
+        deleteCookie("accessToken");
         deleteCookie("idToken");
         router.push("/");
       } finally {

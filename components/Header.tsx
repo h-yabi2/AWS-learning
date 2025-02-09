@@ -4,7 +4,7 @@ export default function Header() {
   const handleLogout = () => {
     // Cookieを削除
     document.cookie =
-      "appSession=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+      "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
     document.cookie =
       "idToken=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
 

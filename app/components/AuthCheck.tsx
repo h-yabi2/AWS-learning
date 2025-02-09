@@ -30,7 +30,7 @@ export default function AuthCheck() {
         console.log(decodedToken);
         if (decodedToken && decodedToken.exp * 1000 < Date.now()) {
           // トークンが期限切れの場合
-          deleteCookie("appSession");
+          deleteCookie("accessToken");
           deleteCookie("idToken");
           router.push("/");
         }

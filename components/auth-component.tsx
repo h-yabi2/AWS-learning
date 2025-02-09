@@ -50,7 +50,7 @@ export function AuthComponent() {
       console.log(data);
 
       // トークンをCookieに保存
-      document.cookie = `appSession=${data.AuthenticationResult.AccessToken}; path=/;`;
+      document.cookie = `accessToken=${data.AuthenticationResult.AccessToken}; path=/;`;
       document.cookie = `idToken=${data.AuthenticationResult.IdToken}; path=/;`;
 
       // ログイン成功後、dashboardページへリダイレクト
