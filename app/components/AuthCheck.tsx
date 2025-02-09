@@ -11,7 +11,7 @@ export default function AuthCheck() {
   const checkToken = useCallback(async () => {
     try {
       const expired = await isTokenExpired();
-      if (expired && pathname !== "/") {
+      if (expired && pathname !== "/" && pathname !== "/signup") {
         clearAuthTokens();
         router.push("/");
       }
