@@ -4,21 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import Header from "@/components/Header";
-
-// トークンのデコード関数
-function parseJwt(token: string) {
-  try {
-    return JSON.parse(atob(token.split(".")[1]));
-  } catch (e) {
-    return null;
-  }
-}
-
-interface UserInfo {
-  email: string;
-  sub: string;
-  email_verified: boolean;
-}
+import { UserInfo, parseJwt, clearAuthTokens } from "@/utils/auth";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -26,10 +12,6 @@ export default function DashboardPage() {
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(true);
-
-  const deleteCookie = (name: string) => {
-    document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT`;
-  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -69,8 +51,7 @@ export default function DashboardPage() {
         setData(responseData);
       } catch (err) {
         setError(err instanceof Error ? err.message : "エラーが発生しました");
-        deleteCookie("accessToken");
-        deleteCookie("idToken");
+        clearAuthTokens();
         router.push("/");
       } finally {
         setLoading(false);

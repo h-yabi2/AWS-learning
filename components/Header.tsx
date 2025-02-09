@@ -1,12 +1,11 @@
 "use client";
 
+import { clearAuthTokens } from "@/utils/auth";
+
 export default function Header() {
   const handleLogout = () => {
-    // Cookieを削除
-    document.cookie =
-      "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
-    document.cookie =
-      "idToken=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+    // clearAuthTokens を使用してCookieを削除
+    clearAuthTokens();
 
     // 強制的にページをリロード（キャッシュをクリアするため）
     window.location.href = "/";

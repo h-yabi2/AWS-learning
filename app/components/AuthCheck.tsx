@@ -1,44 +1,33 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-
-function parseJwt(token: string) {
-  try {
-    return JSON.parse(atob(token.split(".")[1]));
-  } catch (e) {
-    return null;
-  }
-}
-
-const deleteCookie = (name: string) => {
-  document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT`;
-};
+import { useEffect, useCallback } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import { isTokenExpired, clearAuthTokens } from "@/utils/auth";
 
 export default function AuthCheck() {
   const router = useRouter();
+  const pathname = usePathname();
+
+  const checkToken = useCallback(async () => {
+    try {
+      const expired = await isTokenExpired();
+      if (expired && pathname !== "/") {
+        clearAuthTokens();
+        router.push("/");
+      }
+      console.log("AuthCheck");
+    } catch (error) {
+      console.error("Token check failed:", error);
+    }
+  }, [router, pathname]);
 
   useEffect(() => {
-    const checkToken = () => {
-      const idToken = document.cookie
-        .split("; ")
-        .find((row) => row.startsWith("idToken="))
-        ?.split("=")[1];
-
-      if (idToken) {
-        const decodedToken = parseJwt(idToken);
-        console.log(decodedToken);
-        if (decodedToken && decodedToken.exp * 1000 < Date.now()) {
-          // トークンが期限切れの場合
-          deleteCookie("accessToken");
-          deleteCookie("idToken");
-          router.push("/");
-        }
-      }
-    };
-
+    // 初回チェック
     checkToken();
-  }, [router]);
+    const interval = setInterval(checkToken, 60000); // 1分ごとにチェック
 
-  return null; // このコンポーネントは何もレンダリングしない
+    return () => clearInterval(interval);
+  }, [checkToken]);
+
+  return null;
 }

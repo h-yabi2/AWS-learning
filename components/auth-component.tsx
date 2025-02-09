@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { LogIn, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { setAuthTokens } from "@/utils/auth";
 
 export function AuthComponent() {
   const router = useRouter();
@@ -47,17 +48,17 @@ export function AuthComponent() {
       }
 
       const data = await response.json();
-      console.log(data);
 
-      // トークンをCookieに保存
-      document.cookie = `accessToken=${data.AuthenticationResult.AccessToken}; path=/;`;
-      document.cookie = `idToken=${data.AuthenticationResult.IdToken}; path=/;`;
+      // setAuthTokens を使用してトークンを保存
+      setAuthTokens(
+        data.AuthenticationResult.AccessToken,
+        data.AuthenticationResult.IdToken
+      );
 
-      // ログイン成功後、dashboardページへリダイレクト
       router.push("/dashboard");
-    } catch (error) {
+    } catch (err) {
       setLoginError(
-        error instanceof Error ? error.message : "ログインに失敗しました"
+        err instanceof Error ? err.message : "ログインに失敗しました"
       );
     } finally {
       setIsLoggingIn(false);
